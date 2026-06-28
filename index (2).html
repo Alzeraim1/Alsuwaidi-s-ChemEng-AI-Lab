@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alsuwaidi's ChemEng-AI Lab</title>
+<meta name="description" content="Research group of Ahmad Alsuwaidi — bridging chemical reaction engineering, CFD/DEM modeling, and machine learning for cleaner industrial processes." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a1014;
+    --ink-soft: #36444c;
+    --paper: #f3f1ea;
+    --paper-warm: #ebe7dc;
+    --line: #c9c3b4;
+    --reactor: #1f6f6b;        /* deep teal — reactor / catalysis */
+    --reactor-bright: #2fb6a8;
+    --ember: #e0532f;          /* combustion accent */
+    --grid: rgba(31,111,107,0.10);
+    --white: #fbfaf6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--reactor); color: var(--white); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---- nav ---- */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(243,241,234,0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { font-family: 'Space Grotesk'; font-weight: 700; letter-spacing: -0.02em; font-size: 0.98rem; display: flex; align-items: center; gap: 10px; }
+  .brand .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 4px rgba(224,83,47,0.18); }
+  .navlinks { display: flex; gap: 28px; font-size: 0.9rem; }
+  .navlinks a { color: var(--ink-soft); text-decoration: none; font-weight: 500; transition: color .2s; }
+  .navlinks a:hover { color: var(--reactor); }
+  @media (max-width: 640px) { .navlinks { gap: 18px; } .navlinks a.hide-sm { display: none; } }
+
+  /* ---- hero ---- */
+  header.hero {
+    position: relative;
+    padding: 92px 0 76px;
+    border-bottom: 1px solid var(--line);
+    background:
+      linear-gradient(transparent 0 0) padding-box,
+      var(--paper);
+    overflow: hidden;
+  }
+  header.hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(ellipse 80% 70% at 75% 30%, #000 0%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 75% 30%, #000 0%, transparent 75%);
+    pointer-events: none;
+  }
+  .hero .wrap { position: relative; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--reactor); margin-bottom: 22px; display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ""; width: 34px; height: 1px; background: var(--reactor); }
+  h1.title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(2.5rem, 6vw, 4.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+  }
+  h1.title em { font-style: italic; color: var(--reactor); }
+  .lede {
+    margin-top: 26px; max-width: 52ch;
+    font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+    color: var(--ink-soft);
+  }
+  .hero-meta {
+    margin-top: 36px; display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem; letter-spacing: 0.02em;
+    padding: 7px 13px; border: 1px solid var(--line); border-radius: 100px;
+    background: var(--white); color: var(--ink-soft);
+  }
+
+  /* ---- stat band ---- */
+  .stats { border-bottom: 1px solid var(--line); background: var(--paper-warm); }
+  .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .stat { padding: 30px 18px; border-right: 1px solid var(--line); }
+  .stat:last-child { border-right: none; }
+  .stat .n { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 600; line-height: 1; color: var(--reactor); }
+  .stat .l { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-top: 9px; }
+  @media (max-width: 640px) {
+    .stats .wrap { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: none; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--line); }
+  }
+
+  /* ---- sections ---- */
+  section { padding: 84px 0; border-bottom: 1px solid var(--line); }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 42px; }
+  .sec-num { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--ember); letter-spacing: 0.1em; }
+  h2 { font-family: 'Fraunces', serif; font-weight: 500; font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -0.01em; }
+
+  .about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 56px; }
+  @media (max-width: 820px) { .about-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .about-body p { margin-bottom: 18px; font-size: 1.05rem; color: var(--ink-soft); max-width: 60ch; }
+  .about-body p strong { color: var(--ink); font-weight: 600; }
+
+  .profile-card {
+    border: 1px solid var(--line); background: var(--white);
+    padding: 28px; position: relative;
+  }
+  .profile-card::before {
+    content: ""; position: absolute; top: -1px; left: -1px; width: 40px; height: 40px;
+    border-top: 2px solid var(--reactor); border-left: 2px solid var(--reactor);
+  }
+  .profile-photo {
+    width: 100%; aspect-ratio: 4 / 5; object-fit: cover;
+    border: 1px solid var(--line); margin-bottom: 20px;
+    background: var(--paper-warm);
+    display: block;
+  }
+  .profile-card h3 { font-family: 'Fraunces', serif; font-size: 1.35rem; font-weight: 600; }
+  .profile-card .role { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--reactor); letter-spacing: 0.06em; margin: 6px 0 18px; }
+  .kv { display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 0.9rem; }
+  .kv .k { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); min-width: 78px; padding-top: 2px; }
+  .kv .v { color: var(--ink); }
+  .kv .v a { color: var(--reactor); text-decoration: none; border-bottom: 1px solid transparent; }
+  .kv .v a:hover { border-bottom-color: var(--reactor); }
+
+  /* themes */
+  .themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line); }
+  @media (max-width: 820px) { .themes { grid-template-columns: 1fr; } }
+  .theme { padding: 32px 26px; border-right: 1px solid var(--line); position: relative; transition: background .25s; }
+  .theme:last-child { border-right: none; }
+  @media (max-width: 820px) { .theme { border-right: none; border-bottom: 1px solid var(--line); } .theme:last-child { border-bottom: none; } }
+  .theme:hover { background: var(--white); }
+  .theme .tn { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--ember); letter-spacing: 0.1em; }
+  .theme h4 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.18rem; margin: 14px 0 10px; line-height: 1.2; }
+  .theme p { font-size: 0.92rem; color: var(--ink-soft); }
+
+  /* publications */
+  .pub-list { display: flex; flex-direction: column; }
+  .pub {
+    display: grid; grid-template-columns: 64px 1fr auto; gap: 22px; align-items: start;
+    padding: 26px 0; border-top: 1px solid var(--line); transition: background .2s;
+  }
+  .pub:hover { background: var(--white); }
+  .pub:hover .pub-year { color: var(--ember); }
+  .pub-year { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; color: var(--ink); line-height: 1; padding-top: 2px; transition: color .2s; }
+  .pub-main h4 { font-family: 'Space Grotesk'; font-weight: 600; font-size: 1.06rem; line-height: 1.35; letter-spacing: -0.01em; }
+  .pub-main h4 a { color: var(--ink); text-decoration: none; }
+  .pub-main h4 a:hover { color: var(--reactor); }
+  .pub-authors { font-size: 0.88rem; color: var(--ink-soft); margin-top: 7px; }
+  .pub-authors b { color: var(--ink); font-weight: 600; }
+  .pub-venue { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: var(--reactor); margin-top: 8px; letter-spacing: 0.01em; }
+  .pub-cite { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--ink-soft); white-space: nowrap; text-align: right; padding-top: 4px; }
+  .pub-cite b { color: var(--ember); font-size: 0.95rem; }
+  @media (max-width: 640px) {
+    .pub { grid-template-columns: 48px 1fr; gap: 16px; }
+    .pub-cite { grid-column: 2; text-align: left; padding-top: 2px; }
+    .pub-year { font-size: 1.2rem; }
+  }
+
+  /* contact / footer */
+  footer { padding: 70px 0 48px; }
+  .foot-grid { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 28px; }
+  .foot-cta { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 500; max-width: 18ch; line-height: 1.1; }
+  .foot-cta a { color: var(--reactor); text-decoration: none; border-bottom: 2px solid var(--reactor); }
+  .foot-links { display: flex; flex-direction: column; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; }
+  .foot-links a { color: var(--ink-soft); text-decoration: none; }
+  .foot-links a:hover { color: var(--reactor); }
+  .colophon { margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--ink-soft); letter-spacing: 0.04em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+  /* members */
+  .members { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+  @media (max-width: 720px) { .members { grid-template-columns: 1fr; } }
+  .member { padding: 28px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .member .mrole { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ember); }
+  .member h4 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.2rem; margin: 8px 0 6px; }
+  .member p { font-size: 0.9rem; color: var(--ink-soft); }
+  .members-note { margin-top: 22px; font-size: 0.95rem; color: var(--ink-soft); }
+
+  /* join */
+  #join { background: var(--ink); color: var(--white); border-bottom: none; }
+  #join h2 { color: var(--white); }
+  #join .sec-num { color: var(--reactor-bright); }
+  .join-lede { font-size: 1.1rem; color: #c5cdd0; max-width: 56ch; margin-bottom: 38px; }
+  .openings { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 34px; }
+  @media (max-width: 720px) { .openings { grid-template-columns: 1fr; } }
+  .opening { border: 1px solid rgba(255,255,255,0.14); padding: 26px; background: rgba(255,255,255,0.03); transition: border-color .25s, background .25s; }
+  .opening:hover { border-color: var(--reactor-bright); background: rgba(47,182,168,0.06); }
+  .opening .otag { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--reactor-bright); }
+  .opening h4 { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 600; margin: 12px 0 10px; color: var(--white); }
+  .opening p { font-size: 0.94rem; color: #b8c0c4; }
+
+  .uaeu-hero { margin-top: 40px; display: flex; align-items: center; gap: 16px; }
+  .uaeu-hero img { height: 38px; width: auto; }
+  .uaeu-hero span { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); border-left: 1px solid var(--line); padding-left: 16px; }
+  @media (max-width: 560px) { .uaeu-hero { flex-direction: column; align-items: flex-start; gap: 12px; } .uaeu-hero span { border-left: none; padding-left: 0; } }
+  .foot-logo img { height: 44px; width: auto; margin-bottom: 14px; }
+  .join-cta { font-family: 'JetBrains Mono', monospace; font-size: 0.92rem; color: #c5cdd0; }
+  .join-cta a { color: var(--reactor-bright); text-decoration: none; border-bottom: 1px solid var(--reactor-bright); }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>ChemEng·AI Lab</div>
+    <div class="navlinks">
+      <a href="#about">About</a>
+      <a href="#research" class="hide-sm">Research</a>
+      <a href="#publications">Publications</a>
+      <a href="#members" class="hide-sm">Members</a>
+      <a href="#join">Join</a>
+      <a href="flowtwin-ai.html">Consultancy</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">UAE University · Chemical &amp; Petroleum Engineering</div>
+    <h1 class="title">Reaction engineering, <em>rewritten</em> by data.</h1>
+    <p class="lede">We model what happens inside reactors — coke combustion, particle–fluid flow, catalyst regeneration — and pair physics-based simulation with machine learning to make industrial processes cleaner, faster, and predictable.</p>
+    <div class="hero-meta">
+      <span class="chip">CFD / DEM modeling</span>
+      <span class="chip">FCC regeneration</span>
+      <span class="chip">Digital twins</span>
+      <span class="chip">Catalysis &amp; MOFs</span>
+    </div>
+    <div class="uaeu-hero">
+      <img src="uaeu-logo.png" alt="United Arab Emirates University" onerror="this.style.display='none'">
+      <span>Department of Chemical &amp; Petroleum Engineering</span>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><div class="n">5</div><div class="l">Publications</div></div>
+    <div class="stat"><div class="n">77</div><div class="l">Citations</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">h-index</div></div>
+    <div class="stat"><div class="n">2026</div><div class="l">Latest work</div></div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="wrap reveal">
+    <div class="sec-head"><span class="sec-num">01</span><h2>About the lab</h2></div>
+    <div class="about-grid">
+      <div class="about-body">
+        <p>Based in the <strong>Department of Chemical &amp; Petroleum Engineering at United Arab Emirates University</strong>, Alsuwaidi's ChemEng·AI Lab works at the seam between <strong>classical chemical reaction engineering</strong> and <strong>modern computational methods</strong>. Our central question is simple to state and hard to answer: what really happens inside an industrial reactor, and can we predict it well enough to control it?</p>
+        <p>Much of our work centers on <strong>fluid catalytic cracking (FCC) regenerators</strong> — the units where spent catalyst is restored by burning off coke. We study coke oxidation under conventional and oxy-fuel conditions, combining computational fluid dynamics with bench-scale experiments to map temperature, flow, and reaction fields that are otherwise invisible. This work has been carried out in close collaboration with industry, including <strong>Sinopec</strong>.</p>
+        <p>Increasingly, we let <strong>machine learning carry the load</strong>. By pairing convolutional autoencoders with data-driven models, we build digital twins that predict full reactor temperature fields in a fraction of the time a full simulation would take — turning hours of computation into near-instant prediction.</p>
+        <p>The group's work also reaches into <strong>materials</strong>: hierarchical metal–organic frameworks and their pore engineering for selective adsorption and separation.</p>
+      </div>
+      <aside class="profile-card">
+        <img class="profile-photo" src="ahmad.jpg" alt="Ahmad Alsuwaidi"
+             onerror="this.style.display='none'">
+        <h3>Ahmad Alsuwaidi</h3>
+        <div class="role">Lab Lead · Chemical Engineering</div>
+        <div class="kv"><span class="k">Focus</span><span class="v">Reaction engineering, catalysis, AI for process modeling</span></div>
+        <div class="kv"><span class="k">Methods</span><span class="v">CFD, DEM, machine learning, experiment</span></div>
+        <div class="kv"><span class="k">Affil.</span><span class="v">UAE University · Chemical &amp; Petroleum Eng.</span></div>
+        <div class="kv"><span class="k">Industry</span><span class="v">Collaboration with Sinopec</span></div>
+        <div class="kv"><span class="k">Scholar</span><span class="v"><a href="https://scholar.google.com/citations?user=KtdQtNMAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar ↗</a></span></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap reveal">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Research themes</h2></div>
+    <div class="themes">
+      <div class="theme">
+        <div class="tn">/ 01</div>
+        <h4>Catalyst regeneration &amp; combustion</h4>
+        <p>Coke oxidation in FCC regenerators under O₂/N₂ and O₂/CO₂ atmospheres, combining CFD with experimental analysis to understand and optimize regeneration.</p>
+      </div>
+      <div class="theme">
+        <div class="tn">/ 02</div>
+        <h4>AI-driven digital twins</h4>
+        <p>Convolutional autoencoder dimensionality reduction plus machine learning to predict reactor temperature fields fast enough for real-time, twin-based operation.</p>
+      </div>
+      <div class="theme">
+        <div class="tn">/ 03</div>
+        <h4>Functional materials &amp; separation</h4>
+        <p>Hierarchical MOF pore engineering and finned, cellulose-supported frameworks for the selective adsorption of close-boiling hydrocarbons.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="publications">
+  <div class="wrap reveal">
+    <div class="sec-head"><span class="sec-num">03</span><h2>Publications</h2></div>
+    <div class="pub-list">
+
+      <article class="pub">
+        <div class="pub-year">2026</div>
+        <div class="pub-main">
+          <h4><a href="https://scholar.google.com/citations?view_op=view_citation&hl=en&user=KtdQtNMAAAAJ&citation_for_view=KtdQtNMAAAAJ:3fE2CSJIrl8C" target="_blank" rel="noopener">Fast prediction of FCC regenerator temperature fields using a digital twin based on convolutional autoencoder dimensionality reduction and machine learning</a></h4>
+          <div class="pub-authors"><b>A. Alsuwaidi</b>, J.N.V. Salvilla, J. Rong, M. Atef, R. Yang, Q. Liu, S. Kuang, et al.</div>
+          <div class="pub-venue">Chemical Engineering Journal Advances · vol. 27, 101286</div>
+        </div>
+        <div class="pub-cite">new</div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-year">2025</div>
+        <div class="pub-main">
+          <h4><a href="https://scholar.google.com/citations?view_op=view_citation&hl=en&user=KtdQtNMAAAAJ&citation_for_view=KtdQtNMAAAAJ:UebtZRa9Y70C" target="_blank" rel="noopener">Integrated CFD and experimental analysis of coke oxidation in FCC catalyst regeneration under O₂/N₂ and O₂/CO₂</a></h4>
+          <div class="pub-authors"><b>A. Alsuwaidi</b>, S. Yang, A.B. Appiagyei, J.N.V. Salvilla, N. Ahmad, H. Song, et al.</div>
+          <div class="pub-venue">Processes · vol. 13 (6), 1718</div>
+        </div>
+        <div class="pub-cite"><b>1</b> cite</div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-year">2022</div>
+        <div class="pub-main">
+          <h4><a href="https://scholar.google.com/citations?view_op=view_citation&hl=en&user=KtdQtNMAAAAJ&citation_for_view=KtdQtNMAAAAJ:d1gkVwhDpl0C" target="_blank" rel="noopener">Hierarchical metal–organic framework (MOF) pore engineering</a></h4>
+          <div class="pub-authors">X. Yin, <b>A. Alsuwaidi</b>, X. Zhang</div>
+          <div class="pub-venue">Microporous and Mesoporous Materials · vol. 330, 111633</div>
+        </div>
+        <div class="pub-cite"><b>71</b> cites</div>
+      </article>
+
+      <article class="pub">
+        <div class="pub-year">2021</div>
+        <div class="pub-main">
+          <h4><a href="https://scholar.google.com/citations?view_op=view_citation&hl=en&user=KtdQtNMAAAAJ&citation_for_view=KtdQtNMAAAAJ:u-x6o8ySG0sC" target="_blank" rel="noopener">Finned hierarchical MOFs supported on cellulose for the selective adsorption of n-hexane and 1-hexene</a></h4>
+          <div class="pub-authors">X. Yin, J. Zha, S. Gregor, S. Ding, <b>A. Alsuwaidi</b>, X. Zhang</div>
+          <div class="pub-venue">Chemical Communications · vol. 57 (100), 13756–13759</div>
+        </div>
+        <div class="pub-cite"><b>5</b> cites</div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="members">
+  <div class="wrap reveal">
+    <div class="sec-head"><span class="sec-num">04</span><h2>Members</h2></div>
+    <p class="members-note" style="margin-top:0;">Group members will be listed here as the lab grows. We are currently recruiting — see <a href="#join" style="color:var(--reactor);text-decoration:none;border-bottom:1px solid var(--reactor);">open positions</a>.</p>
+  </div>
+</section>
+
+<section id="join">
+  <div class="wrap reveal">
+    <div class="sec-head"><span class="sec-num">05</span><h2>Join the lab</h2></div>
+    <p class="join-lede">We have new openings for researchers excited about chemical reaction engineering, computational modeling, and machine learning for cleaner industrial processes.</p>
+    <div class="openings">
+      <div class="opening">
+        <div class="otag">Open · Postdoctoral</div>
+        <h4>Postdoctoral Researcher</h4>
+        <p>For candidates with a PhD in chemical engineering or a related field and a strong background in CFD/DEM, reaction engineering, or machine learning applied to process systems.</p>
+      </div>
+      <div class="opening">
+        <div class="otag">Open · Doctoral</div>
+        <h4>PhD Positions</h4>
+        <p>For motivated students with a background in chemical, petroleum, or computational engineering who want to work at the interface of modeling, experiment, and AI.</p>
+      </div>
+    </div>
+    <p class="join-cta">To apply or enquire, email <a href="mailto:a.alsuwaidi@uaeu.ac.ae">a.alsuwaidi@uaeu.ac.ae</a> with your CV and a short statement of interest.</p>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap reveal">
+    <div class="foot-logo"><img src="uaeu-logo.png" alt="United Arab Emirates University" onerror="this.style.display='none'"></div>
+    <div class="foot-grid">
+      <div class="foot-cta">Recruiting postdocs &amp; PhD students — or looking to collaborate? <a href="mailto:a.alsuwaidi@uaeu.ac.ae">Get in touch.</a></div>
+      <div class="foot-links">
+        <a href="https://scholar.google.com/citations?user=KtdQtNMAAAAJ&hl=en" target="_blank" rel="noopener">Google Scholar ↗</a>
+        <a href="#join">Open positions</a>
+        <a href="flowtwin-ai.html">Consultancy · FlowTwin ↗</a>
+        <a href="#about">About the lab</a>
+      </div>
+    </div>
+    <div class="colophon">
+      <span>Alsuwaidi's ChemEng·AI Lab</span>
+      <span>Chemical Engineering × Machine Learning</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
